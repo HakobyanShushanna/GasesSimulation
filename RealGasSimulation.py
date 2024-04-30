@@ -56,12 +56,6 @@ fig = plt.figure("Real Gases Simulation")
 ax = fig.add_subplot(111, projection='3d')
 scatter = ax.scatter(x_data, y_data, z_data)
 
-# Text annotations for temperature, mass, pressure, and R
-temperature_annotation = ax.text2D(0.02, 0.95, "Temperature: {} K".format(temperature), transform=ax.transAxes)
-mass_annotation = ax.text2D(0.02, 0.90, "Mass: {} kg".format(1.67e-27), transform=ax.transAxes)  # Initial mass is nitrogen molecule mass
-pressure_annotation = ax.text2D(0.02, 0.85, "Pressure: {} Pa".format(101325), transform=ax.transAxes)
-R_annotation = ax.text2D(0.02, 0.80, "Gas Constant: {} J/(mol*K)".format(8.314), transform=ax.transAxes)
-
 # Random colors for particles
 colors = np.random.choice(['r', 'g', 'b'], size=num_points)  # Randomly choose from 3 colors
 
@@ -106,8 +100,6 @@ def update(frame):
                 if (i, j) not in lines:
                     # Draw a line if it doesn't exist
                     lines[(i, j)] = ax.plot([x_data[i], x_data[j]], [y_data[i], y_data[j]], [z_data[i], z_data[j]], color='gray', alpha=0.5)[0]
-                    print(f"""{colors[i]}[{x_data[i]}, {y_data[i]}, {z_data[i]}]
-                           and {colors[j]}[{x_data[j]}, {y_data[j]}, {z_data[j]}] --- line""")
                 # Check for particle color changes based on reactions
                 if colors[i] == 'g' and colors[j] == 'r':
                     colors[i] = colors[j] = 'm'  # purple
@@ -128,18 +120,21 @@ def update(frame):
     scatter._offsets3d = (x_data, y_data, z_data)
     scatter.set_color(colors)
     
-    # Calculate and display the average mass
-    average_mass = np.mean(masses)
-    mass_annotation.set_text("Average Mass: {} kg".format(average_mass))
+    # Calculate and display the average mass with some deviation
+    average_mass = np.mean(masses) * np.random.uniform(0.9, 1.1)  # Adding deviation
+    print("Average Mass: {:.2e} kg".format(average_mass))
+    
+    # Calculate and display the pressure with some deviation
+    pressure = num_points * 1.38e-23 * temperature / (width * height * depth) * np.random.uniform(0.9, 1.1)  # Adding deviation
+    print("Pressure: {:.2f} * 10^(-23) Pa".format(pressure * pow(10, 23)))
     
     ax.set_xlim(0, width)
     ax.set_ylim(0, height)
     ax.set_zlim(0, depth)
 
-    return scatter, temperature_annotation, mass_annotation, pressure_annotation, R_annotation
-
-
+    return scatter
 
 # Create animation
 ani = FuncAnimation(fig, update, frames=100, interval=100)
+
 plt.show()
